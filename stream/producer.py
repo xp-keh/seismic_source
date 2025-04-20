@@ -8,7 +8,7 @@ import logging
 import pickle
 import json
 from .const import StreamMode
-from utils.redis_client import RedisSingleton
+from config.redis_client import RedisSingleton
 
 load_dotenv()
 

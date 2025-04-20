@@ -35,7 +35,6 @@ class StreamManager:
         if mode == StreamMode.FILE:
             try:
                 self.producer.current_mode = StreamMode.FILE
-                # self.fileclient.startStreaming(*args, **kwargs)
             except Exception as err:
                 print(err)
             finally:

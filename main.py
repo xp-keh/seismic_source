@@ -9,7 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 SOURCE_MSEED = "20090118_064750.mseed"
 
-
 load_dotenv()
 app = FastAPI()
 PORT = os.getenv("PORT", "8003")
@@ -23,7 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.get("/playback")
 def playback(
     background_task: BackgroundTasks,
@@ -31,7 +29,6 @@ def playback(
     end_time: str | None = None,
 ):
     if start_time is None:
-        # start_time = UTCDateTime("2023-10-22T20:00:00.00+07")
         start_time = UTCDateTime("2019-12-31T18:18:28.00+07")
     if end_time is None:
         end_time = UTCDateTime(start_time) + 30 * 6
@@ -40,7 +37,6 @@ def playback(
     background_task.add_task(
         streamManager.start, StreamMode.PLAYBACK, start_time, end_time
     )
-    # streamManager.start(StreamMode.PLAYBACK, start_time, end_time)
     return "ok"
 
 
@@ -60,7 +56,6 @@ def live(background_task: BackgroundTasks):
 def live(background_task: BackgroundTasks, filename: str = SOURCE_MSEED):
     background_task.add_task(streamManager.start, StreamMode.FILE, filename)
     return "ok"
-
 
 if __name__ == "__main__":
     config = uvicorn.Config(

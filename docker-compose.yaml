@@ -1,9 +1,70 @@
-version: '3'
+version: "3.8"
+
 services:
-  eews-producer:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: eews-producer
-    env_file:
-      - .env
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: seismic_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2182
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2182:2182"
+    user: "0:0"
+    networks:
+      data-station-network:
+        ipv4_address: 172.20.14.91
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: seismic_kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://seismic_kafka:9098,OUTSIDE://85.209.163.202:19098
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9098,OUTSIDE://0.0.0.0:19098
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: seismic_zookeeper:2182
+      KAFKA_CREATE_TOPICS: "seismic_raw:1:1"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "19098:19098"
+    user: "0:0"
+    networks:
+      data-station-network:
+        ipv4_address: 172.20.14.92
+
+  seismic-source:
+    build: .
+    container_name: seismic_source
+    pull_policy: build
+    environment:
+      - KAFKA_BROKER=${KAFKA_BROKER}
+      - KAFKA_TOPIC=${KAFKA_TOPIC}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    depends_on:
+      - kafka
+    ports:
+      - "8013:8013"
+    command: uvicorn main:app --host 0.0.0.0 --port 8013
+    networks:
+      data-station-network:
+        ipv4_address: 172.20.14.93
+
+  redis:
+    image: redis:alpine
+    container_name: seismic_redis
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6380:6380"
+    networks:
+      data-station-network:
+        ipv4_address: 172.20.14.94
+
+networks:
+  data-station-network:
+    external: true

@@ -1,18 +1,9 @@
-FROM python:3.11
+FROM python:3.10
 
-# Menyalin kode Anda ke dalam container
 WORKDIR /app
-COPY . /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# set env variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# RUN touch /root/.bashrc \
-#     && .bashrc >> /root/.bashrc
-
-# Menginstal dependensi
-RUN pip install -r requirements.txt
-
-# Menjalankan skrip saat container dijalankan
-CMD ["python", "main.py"]
+COPY . .
+EXPOSE 8013
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8013"]
