@@ -1,0 +1,9 @@
+version: '3'
+services:
+  eews-producer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eews-producer
+    env_file:
+      - .env
