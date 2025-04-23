@@ -38,7 +38,12 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
         raise RuntimeError(" [X] Could not connect to Kafka after multiple attempts.")
 
     def select_streams(self):
+        if not self._stations:
+            self.logger.warning(" [!] No stations defined to subscribe to.")
+            return
+        
         for station in self._stations:
+            self.logger.info(f" [*] Selecting {station['network']}.{station['station']}:{station.get('channel', 'HHZ')}")
             self.select_stream(
                 net=station["network"],
                 station=station["station"],

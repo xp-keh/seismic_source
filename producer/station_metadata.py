@@ -1,7 +1,5 @@
 STATIONS = [
-    {"network": "GE", "station": "UGM", "location": "", "channel": "HHZ"},
-    {"network": "GE", "station": "LDE", "location": "", "channel": "HHZ"},
-    {"network": "GE", "station": "MDSI", "location": "", "channel": "HHZ"},
-    {"network": "GE", "station": "SRBI", "location": "", "channel": "HHZ"},
-    {"network": "GE", "station": "WASI", "location": "", "channel": "HHZ"},
+    {"network": "GE", "station": "UGM", "channel": "HHZ"},
+    {"network": "GE", "station": "YOGI", "channel": "HHZ"},
+    {"network": "GE", "station": "SMRI", "channel": "HHZ"},
 ]
