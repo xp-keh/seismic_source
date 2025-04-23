@@ -1,12 +1,12 @@
+import json
+import time
 from obspy.clients.seedlink import EasySeedLinkClient
 from obspy.clients.seedlink.slpacket import SLPacket
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
-import json
-import time
 from datetime import datetime
 from typing import List
-
+from datetime import timedelta
 from config.logger import Logger
 
 class SeismicSeedLinkClient(EasySeedLinkClient):
@@ -71,16 +71,50 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
                 if trace.stats.channel in ["BHZ", "BHN", "BHE", "HHZ"]:
                     self.on_data_arrive(trace, arrive_time, process_start_time)
 
+    # def on_data_arrive(self, trace, arrive_time, process_start_time):
+    #     msg = self._map_values(trace, arrive_time, process_start_time)
+    #     self.logger.debug(f" [🧾] Mapped trace message:\n{json.dumps(msg, indent=2)}")
+    #     try:
+    #         self._instance.send(self._kafka_topic, msg) # type: ignore
+    #         self.logger.info(f" [>] Sent trace from {trace.stats.station}.{trace.stats.channel}")
+    #     except KafkaError as e:
+    #         self.logger.error(f" [X] Failed to send message to Kafka: {e}")
+
     def on_data_arrive(self, trace, arrive_time, process_start_time):
-        msg = self._map_values(trace, arrive_time, process_start_time)
+        starttime = trace.stats.starttime
+
+        endtime = trace.stats.endtime
+
+        duration_seconds = (endtime - starttime).total_seconds()
+
+        samples_per_second = trace.stats.sampling_rate  
+
+        total_samples = int(duration_seconds * samples_per_second)
+
+        downsampled_data = []
+
+        for i in range(total_samples):
+            current_time = starttime + timedelta(seconds=i / samples_per_second)
+
+            sample_index = int(i * (samples_per_second / 10))  # Taking sample at each 0.1 sec interval
+
+            data_point = {
+                "dt": current_time.strftime("%H:%M:%S.%f")[:-3],  # Format as HH.MM.SS.sss
+                "data": trace.data[sample_index] 
+            }
+            
+            downsampled_data.append(data_point)
+
+        msg = self._map_values(trace, downsampled_data, starttime, arrive_time, process_start_time)
+        
         self.logger.debug(f" [🧾] Mapped trace message:\n{json.dumps(msg, indent=2)}")
         try:
-            self._instance.send(self._kafka_topic, msg) # type: ignore
-            self.logger.info(f" [>] Sent trace from {trace.stats.station}.{trace.stats.channel}")
+            self._instance.send(self._kafka_topic, msg)  # type: ignore
+            self.logger.info(f" [>] Sent downsampled trace from {trace.stats.station}.{trace.stats.channel}")
         except KafkaError as e:
             self.logger.error(f" [X] Failed to send message to Kafka: {e}")
 
-    def _map_values(self, trace, arrive_time, process_start_time):
+    def _map_values(self, trace, downsampled_data, starttime, arrive_time, process_start_time):
         return {
             "station": trace.stats.station,
             "network": trace.stats.network,
@@ -88,6 +122,7 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
             "starttime": trace.stats.starttime.isoformat(),
             "sampling_rate": trace.stats.sampling_rate,
             "data": trace.data.tolist(),
+            "data": downsampled_data,
             "raw_produce_dt": int(arrive_time.timestamp() * 1_000_000),
             "process_start_time": process_start_time
         }
