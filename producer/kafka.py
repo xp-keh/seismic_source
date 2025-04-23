@@ -81,33 +81,34 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
     #         self.logger.error(f" [X] Failed to send message to Kafka: {e}")
 
     def on_data_arrive(self, trace, arrive_time, process_start_time):
-        starttime = trace.stats.starttime
+        starttime = trace.stats.starttime.datetime 
+        endtime = trace.stats.endtime.datetime
+        sampling_rate = trace.stats.sampling_rate
 
-        endtime = trace.stats.endtime
+        total_seconds = (endtime - starttime).total_seconds()
+        total_samples = len(trace.data)
 
-        duration_seconds = (endtime - starttime)
+        samples_per_second = sampling_rate
 
-        samples_per_second = trace.stats.sampling_rate  
-
-        total_samples = int(duration_seconds * samples_per_second)
-
+        interval = 0.1
+        num_points = int(total_seconds / interval)
         downsampled_data = []
 
-        for i in range(total_samples):
-            current_time = starttime + timedelta(seconds=i / samples_per_second)
+        for i in range(num_points):
+            timestamp = starttime + timedelta(seconds=i * interval)
+            sample_index = int(i * interval * samples_per_second)
 
-            sample_index = int(i * (samples_per_second / 10))  # Taking sample at each 0.1 sec interval
+            if sample_index >= total_samples:
+                break  # Avoid IndexError
 
             data_point = {
-                "dt": current_time.strftime("%H:%M:%S.%f")[:-3],  # Format as HH.MM.SS.sss
-                "data": trace.data[sample_index] 
+                "dt": timestamp.strftime("%H:%M:%S.%f")[:-3],
+                "data": trace.data[sample_index]
             }
-            
             downsampled_data.append(data_point)
 
         msg = self._map_values(trace, downsampled_data, starttime, arrive_time, process_start_time)
-        
-        self.logger.debug(f" [🧾] Mapped trace message:\n{json.dumps(msg, indent=2)}")
+
         try:
             self._instance.send(self._kafka_topic, msg)  # type: ignore
             self.logger.info(f" [>] Sent downsampled trace from {trace.stats.station}.{trace.stats.channel}")
