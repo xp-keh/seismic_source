@@ -73,6 +73,7 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
 
     def on_data_arrive(self, trace, arrive_time, process_start_time):
         msg = self._map_values(trace, arrive_time, process_start_time)
+        self.logger.debug(f" [🧾] Mapped trace message:\n{json.dumps(msg, indent=2)}")
         try:
             self._instance.send(self._kafka_topic, msg) # type: ignore
             self.logger.info(f" [>] Sent trace from {trace.stats.station}.{trace.stats.channel}")
