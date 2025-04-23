@@ -102,7 +102,7 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
                 break  # Avoid IndexError
 
             data_point = {
-                "dt": timestamp.strftime("%H:%M:%S.%f")[:-3],
+                "dt": timestamp.isoformat(),
                 "network": trace.stats.network,
                 "station": trace.stats.station,
                 "channel": trace.stats.channel,
