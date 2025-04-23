@@ -18,7 +18,7 @@ services:
     image: confluentinc/cp-kafka:latest
     container_name: seismic_kafka
     depends_on:
-      - zookeeper
+      - zookeeper_seismic
     environment:
       KAFKA_ADVERTISED_LISTENERS: INSIDE://seismic_kafka:9098,OUTSIDE://85.209.163.202:19098
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
@@ -43,7 +43,7 @@ services:
       - KAFKA_TOPIC=${KAFKA_TOPIC}
       - SEEDLINK_TOPIC=${SEEDLINK_TOPIC}
     depends_on:
-      - kafka
+      - kafka_seismic
     ports:
       - "8013:8013"
     command: uvicorn main:app --host 0.0.0.0 --port 8013
