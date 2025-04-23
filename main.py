@@ -2,15 +2,24 @@ from fastapi import FastAPI
 import threading
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
-
 from producer.seismic_streamer import start_seismic_stream
 from config.utils import get_env_value
+from config.logger import Logger
+import logging
+
+
+logging.basicConfig(level=logging.DEBUG) 
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 KAFKA_BROKER = get_env_value("KAFKA_BROKER")
 KAFKA_TOPIC = get_env_value("KAFKA_TOPIC")
 SEEDLINK_HOST = get_env_value("SEEDLINK_HOST")
+
+logger.info(f"KAFKA_BROKER set to: {KAFKA_BROKER}")
+logger.info(f"KAFKA_TOPIC set to: {KAFKA_TOPIC}")
+logger.info(f"SEEDLINK_HOST set to: {SEEDLINK_HOST}")
 
 app = FastAPI()
 
