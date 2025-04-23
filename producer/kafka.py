@@ -85,7 +85,7 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
 
         endtime = trace.stats.endtime
 
-        duration_seconds = (endtime - starttime).total_seconds()
+        duration_seconds = (endtime - starttime)
 
         samples_per_second = trace.stats.sampling_rate  
 
