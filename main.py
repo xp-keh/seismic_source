@@ -3,9 +3,10 @@ import threading
 from producer.kafka import SeismicSeedLinkClient
 from producer.station_metadata import STATIONS
 from config.utils import get_env_value
-from config.logger import Logger
+import logging
 
-logger = Logger().setup_logger(service_name='seismic_producer')
+logging.basicConfig(level=logging.INFO) 
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -16,6 +17,7 @@ def health():
 logger.info(f"Stations to be used: {STATIONS}")
 
 def stream_data_to_kafka():
+    logger.info("[🔧] stream_data_to_kafka called.")
     kafka_broker = get_env_value('KAFKA_BROKER')
     kafka_topic = get_env_value('KAFKA_TOPIC')
     seedlink_host = get_env_value('SEEDLINK_HOST')
