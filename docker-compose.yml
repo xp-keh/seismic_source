@@ -51,19 +51,6 @@ services:
       data-station-network:
         ipv4_address: 172.20.14.93
 
-  redis:
-    image: redis:alpine
-    container_name: seismic_redis
-    restart: always
-    command: redis-server --save 60 1 --loglevel warning --appendonly yes
-    volumes:
-      - redis_data:/data
-    ports:
-      - "6380:6380"
-    networks:
-      data-station-network:
-        ipv4_address: 172.20.14.94
-
 networks:
   data-station-network:
     external: true
