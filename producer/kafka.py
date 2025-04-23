@@ -103,7 +103,7 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
 
             data_point = {
                 "dt": timestamp.strftime("%H:%M:%S.%f")[:-3],
-                "data": trace.data[sample_index]
+                "data": int(trace.data[sample_index]) 
             }
             downsampled_data.append(data_point)
 
