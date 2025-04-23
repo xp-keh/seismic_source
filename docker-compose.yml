@@ -41,8 +41,7 @@ services:
     environment:
       - KAFKA_BROKER=${KAFKA_BROKER}
       - KAFKA_TOPIC=${KAFKA_TOPIC}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
+      - SEEDLINK_TOPIC=${SEEDLINK_TOPIC}
     depends_on:
       - kafka
     ports:
