@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  zookeeper:
+  zookeeper_seismic:
     image: confluentinc/cp-zookeeper:latest
     container_name: seismic_zookeeper
     environment:
@@ -14,7 +14,7 @@ services:
       data-station-network:
         ipv4_address: 172.20.14.91
 
-  kafka:
+  kafka_seismic:
     image: confluentinc/cp-kafka:latest
     container_name: seismic_kafka
     depends_on:
