@@ -11,6 +11,7 @@ from config.logger import Logger
 
 class SeismicSeedLinkClient(EasySeedLinkClient):
     def __init__(self, seedlink_host: str, kafka_broker: str, kafka_topic: str, stations: List[dict]):
+        self.logger.info(" [*] Initializing SeismicSeedLinkClient...")
         super().__init__(server_url=seedlink_host)
         self._kafka_server = kafka_broker
         self._kafka_topic = kafka_topic

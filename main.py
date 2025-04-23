@@ -10,6 +10,8 @@ app = FastAPI()
 def health():
     return {"status": "ok"}
 
+print("Stations to be used:", STATIONS)
+
 def stream_data_to_kafka():
     kafka_broker = get_env_value('KAFKA_BROKER')
     kafka_topic = get_env_value('KAFKA_TOPIC')
