@@ -57,17 +57,17 @@ class SeedLinkClient(StreamClient, EasySeedLinkClient):
                     self.on_data_arrive(trace, arrive_time, process_start_time)
 
 
-    def start_streaming(self, start_time: Optional[Any]= None, end_time: Optional[Any]= None):
-        self.producer.start_trace()
-        print("-" * 20, "Streaming miniseed from seedlink server", "-" * 20)
-        print('Streaming started', not self.__streaming_started)
-        if not self.__streaming_started:
-            self.run()
+    # def start_streaming(self, start_time: Optional[Any]= None, end_time: Optional[Any]= None):
+    #     self.producer.start_trace()
+    #     print("-" * 20, "Streaming miniseed from seedlink server", "-" * 20)
+    #     print('Streaming started', not self.__streaming_started)
+    #     if not self.__streaming_started:
+    #         self.run()
 
-    def stop_streaming(self):
-        self.producer.stop_trace()
-        self.close()
-        print("-" * 20, "Stopping miniseed", "-" * 20)
+    # def stop_streaming(self):
+    #     self.producer.stop_trace()
+    #     self.close()
+    #     print("-" * 20, "Stopping miniseed", "-" * 20)
 
     def on_data_arrive(self, trace: Trace, arrive_time: datetime, process_start_time: float):
         msg = self._map_values(trace, arrive_time, process_start_time)

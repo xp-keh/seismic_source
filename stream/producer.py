@@ -55,29 +55,6 @@ class KafkaProducer:
 
         logging.debug("Finish creating producer")
 
-    def start_trace(self):
-        stats: str = RedisSingleton().r.get("ENABLED_STATION_CODES")
-        self.stations = set(stats.split(","))
-        for i in range(0, self.partitions):
-            self.producer.produce(
-                self.topic_name,
-                value=self.value_serializer(json.dumps({"type": "start"})),
-                partition=i,
-                key="start",
-            )
-        self.producer.flush()
-        print("=" * 20, "Start Trace", "=" * 20)
-
-    def stop_trace(self):
-        for i in range(0, self.partitions):
-            self.producer.produce(
-                self.topic_name,
-                value=self.value_serializer(json.dumps({"type": "stop"})),
-                partition=i,
-                key="stop",
-            )
-        self.producer.flush()
-        print("=" * 20, "Stop Trace", "=" * 20)
 
     def produce_message(
         self,
