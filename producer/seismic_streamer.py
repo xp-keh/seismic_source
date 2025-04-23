@@ -18,11 +18,3 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
             "data": trace.data.tolist()
         }
         self.kafka_producer.send(data_dict)
-
-def start_seismic_stream(seedlink_host: str, kafka_broker: str, kafka_topic: str):
-    producer = Producer(kafka_broker, kafka_topic)
-    producer.create_instance()
-
-    client = SeismicSeedLinkClient(kafka_producer=producer)
-    client.select_streams(*[(s["network"], s["station"], s["location"], s["channel"]) for s in STATIONS]) # type: ignore
-    client.run(seedlink_host) # type: ignore

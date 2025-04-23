@@ -1,43 +1,35 @@
 from fastapi import FastAPI
-import threading
-from dotenv import load_dotenv
-from fastapi.middleware.cors import CORSMiddleware
-from producer.seismic_streamer import start_seismic_stream
+from dotenv import load_dotenv 
 from config.utils import get_env_value
-from config.logger import Logger
-import logging
-
-
-logging.basicConfig(level=logging.DEBUG) 
-logger = logging.getLogger(__name__)
+from producer.kafka import Producer
+from producer.seismic_streamer import SeismicSeedLinkClient
+import threading
 
 load_dotenv()
 
-KAFKA_BROKER = get_env_value("KAFKA_BROKER")
-KAFKA_TOPIC = get_env_value("KAFKA_TOPIC")
-SEEDLINK_HOST = get_env_value("SEEDLINK_HOST")
+def start_seismic_stream(seedlink_host: str, kafka_broker: str, kafka_topic: str) -> None:
+    producer = Producer(kafka_broker=kafka_broker, kafka_topic=kafka_topic)
+    producer.create_instance()
 
-logger.info(f"KAFKA_BROKER set to: {KAFKA_BROKER}")
-logger.info(f"KAFKA_TOPIC set to: {KAFKA_TOPIC}")
-logger.info(f"SEEDLINK_HOST set to: {SEEDLINK_HOST}")
+    client = SeismicSeedLinkClient(kafka_producer=producer)
+    client.select_streams(*[(s["network"], s["station"], s["location"], s["channel"]) for s in STATIONS]) # type: ignore
+    client.run(seedlink_host)  # type: ignore
 
 app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],  
-    allow_headers=["*"],
-)
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-streaming_thread = threading.Thread(
+kafka_broker = get_env_value('KAFKA_BROKER')
+kafka_topic = get_env_value('KAFKA_TOPIC')
+seedlink_host = get_env_value('SEEDLINK_HOST')
+
+# Create a thread for seismic stream
+t_seismic = threading.Thread(
     target=start_seismic_stream,
-    args=(SEEDLINK_HOST, KAFKA_BROKER, KAFKA_TOPIC),
+    args=(seedlink_host, kafka_broker, kafka_topic),
     daemon=True
 )
-streaming_thread.start()
+
+t_seismic.start()
