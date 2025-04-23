@@ -112,6 +112,8 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
         try:
             self._instance.send(self._kafka_topic, msg)  # type: ignore
             self.logger.info(f" [>] Sent downsampled trace from {trace.stats.station}.{trace.stats.channel}")
+            self.logger.info(f" [📉] Downsampled data:\n{json.dumps(downsampled_data, indent=2)}")
+
         except KafkaError as e:
             self.logger.error(f" [X] Failed to send message to Kafka: {e}")
 
