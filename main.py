@@ -13,7 +13,7 @@ app = FastAPI()
 def health():
     return {"status": "ok"}
 
-logger.info("Stations to be used:", STATIONS)
+logger.info(f"Stations to be used: {STATIONS}")
 
 def stream_data_to_kafka():
     kafka_broker = get_env_value('KAFKA_BROKER')
