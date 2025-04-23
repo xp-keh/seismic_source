@@ -41,7 +41,7 @@ services:
     environment:
       - KAFKA_BROKER=${KAFKA_BROKER}
       - KAFKA_TOPIC=${KAFKA_TOPIC}
-      - SEEDLINK_TOPIC=${SEEDLINK_TOPIC}
+      - SEEDLINK_HOST=${SEEDLINK_HOST}
     depends_on:
       - kafka_seismic
     ports:
