@@ -68,17 +68,8 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
 
             if isinstance(data, SLPacket):
                 trace = data.get_trace()
-                if trace.stats.channel in ["BHZ", "BHN", "BHE", "HHZ", "HHN", "HHE"]:
+                if trace.stats.channel in ["BHZ", "BHN", "BHE"]:
                     self.on_data_arrive(trace, arrive_time, process_start_time)
-
-    # def on_data_arrive(self, trace, arrive_time, process_start_time):
-    #     msg = self._map_values(trace, arrive_time, process_start_time)
-    #     self.logger.debug(f" [🧾] Mapped trace message:\n{json.dumps(msg, indent=2)}")
-    #     try:
-    #         self._instance.send(self._kafka_topic, msg) # type: ignore
-    #         self.logger.info(f" [>] Sent trace from {trace.stats.station}.{trace.stats.channel}")
-    #     except KafkaError as e:
-    #         self.logger.error(f" [X] Failed to send message to Kafka: {e}")
 
     def on_data_arrive(self, trace, arrive_time, process_start_time):
         starttime = trace.stats.starttime.datetime 
@@ -99,7 +90,7 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
             sample_index = int(i * interval * samples_per_second)
 
             if sample_index >= total_samples:
-                break  # Avoid IndexError
+                break 
 
             data_point = {
                 "dt": timestamp.isoformat(),
