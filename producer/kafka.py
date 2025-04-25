@@ -68,7 +68,7 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
 
             if isinstance(data, SLPacket):
                 trace = data.get_trace()
-                if trace.stats.channel in ["BHZ", "BHN", "BHE", "HHZ"]:
+                if trace.stats.channel in ["BHZ", "BHN", "BHE", "HHZ", "HHN", "HHE"]:
                     self.on_data_arrive(trace, arrive_time, process_start_time)
 
     # def on_data_arrive(self, trace, arrive_time, process_start_time):
