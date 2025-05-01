@@ -1,4 +1,4 @@
-import json
+import orjson
 import time
 from obspy.clients.seedlink import EasySeedLinkClient
 from obspy.clients.seedlink.slpacket import SLPacket
@@ -28,7 +28,7 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
             try:
                 self._instance = KafkaProducer(
                     bootstrap_servers=self._kafka_server,
-                    value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+                    value_serializer=lambda v: orjson.dumps(v),
                     api_version=(0, 11, 5)
                 )
                 self.logger.info(" [*] Kafka producer connected.")
