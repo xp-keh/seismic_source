@@ -1,5 +1,6 @@
 import orjson
 import time
+import traceback
 from obspy.clients.seedlink import EasySeedLinkClient
 from obspy.clients.seedlink.slpacket import SLPacket
 from kafka import KafkaProducer
@@ -55,21 +56,55 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
     def run(self):
         self.logger.info(" [*] Starting seismic data stream...")
         while True:
-            data = self.conn.collect()
-            arrive_time = datetime.utcnow()
-            process_start_time = time.time()
+            try:
+                data = self.conn.collect()
+                arrive_time = datetime.utcnow()
+                process_start_time = time.time()
 
-            if data == SLPacket.SLTERMINATE:
-                self.logger.warning(" [!] SeedLink connection terminated.")
-                break
-            elif data == SLPacket.SLERROR:
-                self.logger.error(" [X] SeedLink connection error.")
-                continue
+                if data == SLPacket.SLTERMINATE:
+                    self.logger.warning(" [!] SeedLink connection terminated.")
+                    time.sleep(5)
+                    continue
+                elif data == SLPacket.SLERROR:
+                    self.logger.error(" [X] SeedLink connection error.")
+                    time.sleep(5)
+                    continue
 
-            if isinstance(data, SLPacket):
-                trace = data.get_trace()
-                if trace.stats.channel in ["BHZ", "BHN", "BHE"]:
-                    self.on_data_arrive(trace, arrive_time, process_start_time)
+                if isinstance(data, SLPacket):
+                    trace = data.get_trace()
+                    if trace.stats.channel in ["BHZ", "BHN", "BHE"]:
+                        self.on_data_arrive(trace, arrive_time, process_start_time)
+
+            except Exception as e:
+                self.logger.error(f" [X] Error in data stream: {e}")
+                self.logger.debug(traceback.format_exc())
+                time.sleep(10)  # added 10s backoff
+
+                try:
+                    self.logger.info(" [*] Attempting to reconnect to SeedLink server...")
+                    self.conn.connect()  # reinitiate the connection
+                    time.sleep(5)
+                except Exception as conn_err:
+                    self.logger.error(f" [X] Reconnection failed: {conn_err}")
+                    self.logger.debug(traceback.format_exc())
+                    time.sleep(10)
+
+        # while True:
+        #     data = self.conn.collect()
+        #     arrive_time = datetime.utcnow()
+        #     process_start_time = time.time()
+
+        #     if data == SLPacket.SLTERMINATE:
+        #         self.logger.warning(" [!] SeedLink connection terminated.")
+        #         break
+        #     elif data == SLPacket.SLERROR:
+        #         self.logger.error(" [X] SeedLink connection error.")
+        #         continue
+
+        #     if isinstance(data, SLPacket):
+        #         trace = data.get_trace()
+        #         if trace.stats.channel in ["BHZ", "BHN", "BHE"]:
+        #             self.on_data_arrive(trace, arrive_time, process_start_time)
 
     def on_data_arrive(self, trace, arrive_time, process_start_time):
         starttime = trace.stats.starttime.datetime 
