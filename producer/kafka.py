@@ -1,3 +1,4 @@
+import json
 import orjson
 import time
 import traceback
@@ -89,23 +90,6 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
                     self.logger.debug(traceback.format_exc())
                     time.sleep(10)
 
-        # while True:
-        #     data = self.conn.collect()
-        #     arrive_time = datetime.utcnow()
-        #     process_start_time = time.time()
-
-        #     if data == SLPacket.SLTERMINATE:
-        #         self.logger.warning(" [!] SeedLink connection terminated.")
-        #         break
-        #     elif data == SLPacket.SLERROR:
-        #         self.logger.error(" [X] SeedLink connection error.")
-        #         continue
-
-        #     if isinstance(data, SLPacket):
-        #         trace = data.get_trace()
-        #         if trace.stats.channel in ["BHZ", "BHN", "BHE"]:
-        #             self.on_data_arrive(trace, arrive_time, process_start_time)
-
     def on_data_arrive(self, trace, arrive_time, process_start_time):
         starttime = trace.stats.starttime.datetime 
         endtime = trace.stats.endtime.datetime
@@ -140,8 +124,8 @@ class SeismicSeedLinkClient(EasySeedLinkClient):
 
         try:
             self._instance.send(self._kafka_topic, msg)  # type: ignore
-            # self.logger.info(f" [>] Sent downsampled trace from {trace.stats.station}.{trace.stats.channel}")
-            # self.logger.info(f" [📉] Downsampled data:\n{json.dumps(downsampled_data, indent=2)}")
+            self.logger.info(f" [>] Sent downsampled trace from {trace.stats.station}.{trace.stats.channel}")
+            self.logger.info(f" [📉] Downsampled data:\n{json.dumps(downsampled_data, indent=2)}")
 
         except KafkaError as e:
             self.logger.error(f" [X] Failed to send message to Kafka: {e}")
