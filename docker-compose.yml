@@ -31,8 +31,8 @@ services:
       - "19098:19098"
     user: "0:0"
     networks:
-      data-station-network:
-        ipv4_address: 172.20.14.93
+      nginx-manager_customnetwork:
+        ipv4_address: 172.20.0.130
 
   seismic-source:
     build: .
@@ -48,9 +48,9 @@ services:
       - "8013:8013"
     command: uvicorn main:app --host 0.0.0.0 --port 8013
     networks:
-      data-station-network:
-        ipv4_address: 172.20.14.94
+      nginx-manager_customnetwork:
+        ipv4_address: 172.20.0.131
 
 networks:
-  data-station-network:
+  nginx-manager_customnetwork:
     external: true
