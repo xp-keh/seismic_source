@@ -12,7 +12,7 @@ services:
     user: "0:0"
     networks:
       nginx-manager_customnetwork:
-        ipv4_address: 172.20.0.130
+        ipv4_address: 172.20.0.131
 
   kafka_seismic:
     image: confluentinc/cp-kafka:7.4.3
@@ -32,7 +32,7 @@ services:
     user: "0:0"
     networks:
       nginx-manager_customnetwork:
-        ipv4_address: 172.20.0.131
+        ipv4_address: 172.20.0.132
 
   seismic-source:
     build: .
@@ -49,7 +49,7 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8013
     networks:
       nginx-manager_customnetwork:
-        ipv4_address: 172.20.0.132
+        ipv4_address: 172.20.0.133
 
 networks:
   nginx-manager_customnetwork:
