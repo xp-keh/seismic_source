@@ -15,7 +15,7 @@ services:
         ipv4_address: 172.20.0.130
 
   kafka_seismic:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.4.3
     container_name: seismic_kafka
     depends_on:
       - zookeeper_seismic
